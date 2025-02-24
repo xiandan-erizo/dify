@@ -1,11 +1,16 @@
 import json
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional, Union
 
+if TYPE_CHECKING:
+    from models.model import AppMode
+from enum import StrEnum
+from typing import TYPE_CHECKING
+
 import sqlalchemy as sa
-from sqlalchemy import func
+from sqlalchemy import Index, PrimaryKeyConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 import contexts
@@ -14,6 +19,7 @@ from core.helper import encrypter
 from core.variables import SecretVariable, Variable
 from factories import variable_factory
 from libs import helper
+from models.base import Base
 from models.enums import CreatedByRole
 
 from .account import Account
@@ -21,7 +27,7 @@ from .engine import db
 from .types import StringUUID
 
 if TYPE_CHECKING:
-    from models.model import AppMode, Message
+    from models.model import AppMode
 
 
 class WorkflowType(Enum):
@@ -59,7 +65,7 @@ class WorkflowType(Enum):
         return cls.WORKFLOW if app_mode == AppMode.WORKFLOW else cls.CHAT
 
 
-class Workflow(db.Model):  # type: ignore[name-defined]
+class Workflow(Base):
     """
     Workflow, for `Workflow App` and `Chat App workflow mode`.
 
@@ -249,11 +255,13 @@ class Workflow(db.Model):  # type: ignore[name-defined]
         ]
 
         # decrypt secret variables value
-        decrypt_func = (
-            lambda var: var.model_copy(update={"value": encrypter.decrypt_token(tenant_id=tenant_id, token=var.value)})
-            if isinstance(var, SecretVariable)
-            else var
-        )
+        def decrypt_func(var):
+            return (
+                var.model_copy(update={"value": encrypter.decrypt_token(tenant_id=tenant_id, token=var.value)})
+                if isinstance(var, SecretVariable)
+                else var
+            )
+
         results = list(map(decrypt_func, results))
         return results
 
@@ -277,11 +285,13 @@ class Workflow(db.Model):  # type: ignore[name-defined]
                 value[i] = origin_variables_dictionary[variable.id].model_copy(update={"name": variable.name})
 
         # encrypt secret variables value
-        encrypt_func = (
-            lambda var: var.model_copy(update={"value": encrypter.encrypt_token(tenant_id=tenant_id, token=var.value)})
-            if isinstance(var, SecretVariable)
-            else var
-        )
+        def encrypt_func(var):
+            return (
+                var.model_copy(update={"value": encrypter.encrypt_token(tenant_id=tenant_id, token=var.value)})
+                if isinstance(var, SecretVariable)
+                else var
+            )
+
         encrypted_vars = list(map(encrypt_func, value))
         environment_variables_json = json.dumps(
             {var.name: var.model_dump() for var in encrypted_vars},
@@ -347,7 +357,7 @@ class WorkflowRunStatus(StrEnum):
         raise ValueError(f"invalid workflow run status value {value}")
 
 
-class WorkflowRun(db.Model):  # type: ignore[name-defined]
+class WorkflowRun(Base):
     """
     Workflow Run
 
@@ -392,23 +402,23 @@ class WorkflowRun(db.Model):  # type: ignore[name-defined]
         db.Index("workflow_run_tenant_app_sequence_idx", "tenant_id", "app_id", "sequence_number"),
     )
 
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=False)
-    app_id = db.Column(StringUUID, nullable=False)
-    sequence_number = db.Column(db.Integer, nullable=False)
-    workflow_id = db.Column(StringUUID, nullable=False)
-    type = db.Column(db.String(255), nullable=False)
-    triggered_from = db.Column(db.String(255), nullable=False)
-    version = db.Column(db.String(255), nullable=False)
-    graph = db.Column(db.Text)
-    inputs = db.Column(db.Text)
-    status = db.Column(db.String(255), nullable=False)  # running, succeeded, failed, stopped, partial-succeeded
+    id: Mapped[str] = mapped_column(StringUUID, server_default=db.text("uuid_generate_v4()"))
+    tenant_id: Mapped[str] = mapped_column(StringUUID)
+    app_id: Mapped[str] = mapped_column(StringUUID)
+    sequence_number: Mapped[int] = mapped_column()
+    workflow_id: Mapped[str] = mapped_column(StringUUID)
+    type: Mapped[str] = mapped_column(db.String(255))
+    triggered_from: Mapped[str] = mapped_column(db.String(255))
+    version: Mapped[str] = mapped_column(db.String(255))
+    graph: Mapped[Optional[str]] = mapped_column(db.Text)
+    inputs: Mapped[Optional[str]] = mapped_column(db.Text)
+    status: Mapped[str] = mapped_column(db.String(255))  # running, succeeded, failed, stopped, partial-succeeded
     outputs: Mapped[Optional[str]] = mapped_column(sa.Text, default="{}")
-    error = db.Column(db.Text)
-    elapsed_time = db.Column(db.Float, nullable=False, server_default=db.text("0"))
-    total_tokens = db.Column(db.Integer, nullable=False, server_default=db.text("0"))
+    error: Mapped[Optional[str]] = mapped_column(db.Text)
+    elapsed_time = db.Column(db.Float, nullable=False, server_default=sa.text("0"))
+    total_tokens: Mapped[int] = mapped_column(sa.BigInteger, server_default=sa.text("0"))
     total_steps = db.Column(db.Integer, server_default=db.text("0"))
-    created_by_role = db.Column(db.String(255), nullable=False)  # account, end_user
+    created_by_role: Mapped[str] = mapped_column(db.String(255))  # account, end_user
     created_by = db.Column(StringUUID, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
     finished_at = db.Column(db.DateTime)
@@ -439,7 +449,7 @@ class WorkflowRun(db.Model):  # type: ignore[name-defined]
         return json.loads(self.outputs) if self.outputs else {}
 
     @property
-    def message(self) -> Optional["Message"]:
+    def message(self):
         from models.model import Message
 
         return (
@@ -549,7 +559,7 @@ class WorkflowNodeExecutionStatus(Enum):
         raise ValueError(f"invalid workflow node execution status value {value}")
 
 
-class WorkflowNodeExecution(db.Model):  # type: ignore[name-defined]
+class WorkflowNodeExecution(Base):
     """
     Workflow Node Execution
 
@@ -621,29 +631,29 @@ class WorkflowNodeExecution(db.Model):  # type: ignore[name-defined]
         ),
     )
 
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=False)
-    app_id = db.Column(StringUUID, nullable=False)
-    workflow_id = db.Column(StringUUID, nullable=False)
-    triggered_from = db.Column(db.String(255), nullable=False)
-    workflow_run_id = db.Column(StringUUID)
-    index = db.Column(db.Integer, nullable=False)
-    predecessor_node_id = db.Column(db.String(255))
-    node_execution_id = db.Column(db.String(255), nullable=True)
-    node_id = db.Column(db.String(255), nullable=False)
-    node_type = db.Column(db.String(255), nullable=False)
-    title = db.Column(db.String(255), nullable=False)
-    inputs = db.Column(db.Text)
-    process_data = db.Column(db.Text)
-    outputs = db.Column(db.Text)
-    status = db.Column(db.String(255), nullable=False)
-    error = db.Column(db.Text)
-    elapsed_time = db.Column(db.Float, nullable=False, server_default=db.text("0"))
-    execution_metadata = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-    created_by_role = db.Column(db.String(255), nullable=False)
-    created_by = db.Column(StringUUID, nullable=False)
-    finished_at = db.Column(db.DateTime)
+    id: Mapped[str] = mapped_column(StringUUID, server_default=db.text("uuid_generate_v4()"))
+    tenant_id: Mapped[str] = mapped_column(StringUUID)
+    app_id: Mapped[str] = mapped_column(StringUUID)
+    workflow_id: Mapped[str] = mapped_column(StringUUID)
+    triggered_from: Mapped[str] = mapped_column(db.String(255))
+    workflow_run_id: Mapped[Optional[str]] = mapped_column(StringUUID)
+    index: Mapped[int] = mapped_column(db.Integer)
+    predecessor_node_id: Mapped[Optional[str]] = mapped_column(db.String(255))
+    node_execution_id: Mapped[Optional[str]] = mapped_column(db.String(255))
+    node_id: Mapped[str] = mapped_column(db.String(255))
+    node_type: Mapped[str] = mapped_column(db.String(255))
+    title: Mapped[str] = mapped_column(db.String(255))
+    inputs: Mapped[Optional[str]] = mapped_column(db.Text)
+    process_data: Mapped[Optional[str]] = mapped_column(db.Text)
+    outputs: Mapped[Optional[str]] = mapped_column(db.Text)
+    status: Mapped[str] = mapped_column(db.String(255))
+    error: Mapped[Optional[str]] = mapped_column(db.Text)
+    elapsed_time: Mapped[float] = mapped_column(db.Float, server_default=db.text("0"))
+    execution_metadata: Mapped[Optional[str]] = mapped_column(db.Text)
+    created_at: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.current_timestamp())
+    created_by_role: Mapped[str] = mapped_column(db.String(255))
+    created_by: Mapped[str] = mapped_column(StringUUID)
+    finished_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime)
 
     @property
     def created_by_account(self):
@@ -715,7 +725,7 @@ class WorkflowAppLogCreatedFrom(Enum):
         raise ValueError(f"invalid workflow app log created from value {value}")
 
 
-class WorkflowAppLog(db.Model):  # type: ignore[name-defined]
+class WorkflowAppLog(Base):
     """
     Workflow App execution log, excluding workflow debugging records.
 
@@ -750,11 +760,11 @@ class WorkflowAppLog(db.Model):  # type: ignore[name-defined]
         db.Index("workflow_app_log_app_idx", "tenant_id", "app_id"),
     )
 
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=False)
-    app_id = db.Column(StringUUID, nullable=False)
+    id: Mapped[str] = mapped_column(StringUUID, server_default=db.text("uuid_generate_v4()"))
+    tenant_id: Mapped[str] = mapped_column(StringUUID)
+    app_id: Mapped[str] = mapped_column(StringUUID)
     workflow_id = db.Column(StringUUID, nullable=False)
-    workflow_run_id = db.Column(StringUUID, nullable=False)
+    workflow_run_id: Mapped[str] = mapped_column(StringUUID)
     created_from = db.Column(db.String(255), nullable=False)
     created_by_role = db.Column(db.String(255), nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
@@ -777,15 +787,20 @@ class WorkflowAppLog(db.Model):  # type: ignore[name-defined]
         return db.session.get(EndUser, self.created_by) if created_by_role == CreatedByRole.END_USER else None
 
 
-class ConversationVariable(db.Model):  # type: ignore[name-defined]
+class ConversationVariable(Base):
     __tablename__ = "workflow_conversation_variables"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "conversation_id", name="workflow_conversation_variables_pkey"),
+        Index("workflow__conversation_variables_app_id_idx", "app_id"),
+        Index("workflow__conversation_variables_created_at_idx", "created_at"),
+    )
 
-    id: Mapped[str] = db.Column(StringUUID, primary_key=True)
-    conversation_id: Mapped[str] = db.Column(StringUUID, nullable=False, primary_key=True)
-    app_id: Mapped[str] = db.Column(StringUUID, nullable=False, index=True)
-    data = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, index=True, server_default=func.current_timestamp())
-    updated_at = db.Column(
+    id: Mapped[str] = mapped_column(StringUUID, primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(StringUUID, nullable=False, primary_key=True)
+    app_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    data = mapped_column(db.Text, nullable=False)
+    created_at = mapped_column(db.DateTime, nullable=False, server_default=func.current_timestamp())
+    updated_at = mapped_column(
         db.DateTime, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
     )
 

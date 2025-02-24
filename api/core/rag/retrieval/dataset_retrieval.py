@@ -26,9 +26,7 @@ from core.rag.rerank.rerank_type import RerankMode
 from core.rag.retrieval.retrieval_methods import RetrievalMethod
 from core.rag.retrieval.router.multi_dataset_function_call_router import FunctionCallMultiDatasetRouter
 from core.rag.retrieval.router.multi_dataset_react_route import ReactMultiDatasetRouter
-from core.tools.tool.dataset_retriever.dataset_multi_retriever_tool import DatasetMultiRetrieverTool
-from core.tools.tool.dataset_retriever.dataset_retriever_base_tool import DatasetRetrieverBaseTool
-from core.tools.tool.dataset_retriever.dataset_retriever_tool import DatasetRetrieverTool
+from core.tools.utils.dataset_retriever.dataset_retriever_base_tool import DatasetRetrieverBaseTool
 from extensions.ext_database import db
 from models.dataset import Dataset, DatasetQuery, DocumentSegment
 from models.dataset import Document as DatasetDocument
@@ -166,43 +164,29 @@ class DatasetRetrieval:
                 "content": item.page_content,
             }
             retrieval_resource_list.append(source)
-        document_score_list = {}
         # deal with dify documents
         if dify_documents:
-            for item in dify_documents:
-                if item.metadata.get("score"):
-                    document_score_list[item.metadata["doc_id"]] = item.metadata["score"]
-
-            index_node_ids = [document.metadata["doc_id"] for document in dify_documents]
-            segments = DocumentSegment.query.filter(
-                DocumentSegment.dataset_id.in_(dataset_ids),
-                DocumentSegment.status == "completed",
-                DocumentSegment.enabled == True,
-                DocumentSegment.index_node_id.in_(index_node_ids),
-            ).all()
-
-            if segments:
-                index_node_id_to_position = {id: position for position, id in enumerate(index_node_ids)}
-                sorted_segments = sorted(
-                    segments, key=lambda segment: index_node_id_to_position.get(segment.index_node_id, float("inf"))
-                )
-                for segment in sorted_segments:
+            records = RetrievalService.format_retrieval_documents(dify_documents)
+            if records:
+                for record in records:
+                    segment = record.segment
                     if segment.answer:
                         document_context_list.append(
                             DocumentContext(
                                 content=f"question:{segment.get_sign_content()} answer:{segment.answer}",
-                                score=document_score_list.get(segment.index_node_id, None),
+                                score=record.score,
                             )
                         )
                     else:
                         document_context_list.append(
                             DocumentContext(
                                 content=segment.get_sign_content(),
-                                score=document_score_list.get(segment.index_node_id, None),
+                                score=record.score,
                             )
                         )
                 if show_retrieve_source:
-                    for segment in sorted_segments:
+                    for record in records:
+                        segment = record.segment
                         dataset = Dataset.query.filter_by(id=segment.dataset_id).first()
                         document = DatasetDocument.query.filter(
                             DatasetDocument.id == segment.document_id,
@@ -218,7 +202,7 @@ class DatasetRetrieval:
                                 "data_source_type": document.data_source_type,
                                 "segment_id": segment.id,
                                 "retriever_from": invoke_from.to_source(),
-                                "score": document_score_list.get(segment.index_node_id, 0.0),
+                                "score": record.score or 0.0,
                             }
 
                             if invoke_from.to_source() == "dev":
@@ -458,7 +442,7 @@ class DatasetRetrieval:
                 db.session.commit()
 
         # get tracing instance
-        trace_manager: Optional[TraceQueueManager] = (
+        trace_manager: TraceQueueManager | None = (
             self.application_generate_entity.trace_manager if self.application_generate_entity else None
         )
         if trace_manager:
@@ -602,6 +586,8 @@ class DatasetRetrieval:
                 if score_threshold_enabled:
                     score_threshold = retrieval_model_config.get("score_threshold")
 
+                from core.tools.utils.dataset_retriever.dataset_retriever_tool import DatasetRetrieverTool
+
                 tool = DatasetRetrieverTool.from_dataset(
                     dataset=dataset,
                     top_k=top_k,
@@ -613,20 +599,24 @@ class DatasetRetrieval:
 
                 tools.append(tool)
         elif retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE:
-            if retrieve_config.reranking_model is not None:
-                tool = DatasetMultiRetrieverTool.from_dataset(
-                    dataset_ids=[dataset.id for dataset in available_datasets],
-                    tenant_id=tenant_id,
-                    top_k=retrieve_config.top_k or 2,
-                    score_threshold=retrieve_config.score_threshold,
-                    hit_callbacks=[hit_callback],
-                    return_resource=return_resource,
-                    retriever_from=invoke_from.to_source(),
-                    reranking_provider_name=retrieve_config.reranking_model.get("reranking_provider_name"),
-                    reranking_model_name=retrieve_config.reranking_model.get("reranking_model_name"),
-                )
+            from core.tools.utils.dataset_retriever.dataset_multi_retriever_tool import DatasetMultiRetrieverTool
 
-                tools.append(tool)
+            if retrieve_config.reranking_model is None:
+                raise ValueError("Reranking model is required for multiple retrieval")
+
+            tool = DatasetMultiRetrieverTool.from_dataset(
+                dataset_ids=[dataset.id for dataset in available_datasets],
+                tenant_id=tenant_id,
+                top_k=retrieve_config.top_k or 2,
+                score_threshold=retrieve_config.score_threshold,
+                hit_callbacks=[hit_callback],
+                return_resource=return_resource,
+                retriever_from=invoke_from.to_source(),
+                reranking_provider_name=retrieve_config.reranking_model.get("reranking_provider_name"),
+                reranking_model_name=retrieve_config.reranking_model.get("reranking_model_name"),
+            )
+
+            tools.append(tool)
 
         return tools
 

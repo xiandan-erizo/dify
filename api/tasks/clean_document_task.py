@@ -6,7 +6,7 @@ import click
 from celery import shared_task  # type: ignore
 
 from core.rag.index_processor.index_processor_factory import IndexProcessorFactory
-from core.tools.utils.web_reader_tool import get_image_upload_file_ids
+from core.tools.utils.rag_web_reader import get_image_upload_file_ids
 from extensions.ext_database import db
 from extensions.ext_storage import storage
 from models.dataset import Dataset, DocumentSegment
@@ -38,7 +38,7 @@ def clean_document_task(document_id: str, dataset_id: str, doc_form: str, file_i
         if segments:
             index_node_ids = [segment.index_node_id for segment in segments]
             index_processor = IndexProcessorFactory(doc_form).init_index_processor()
-            index_processor.clean(dataset, index_node_ids)
+            index_processor.clean(dataset, index_node_ids, with_keywords=True, delete_child_chunks=True)
 
             for segment in segments:
                 image_upload_file_ids = get_image_upload_file_ids(segment.content)
