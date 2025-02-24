@@ -17,10 +17,10 @@ import ResultPanel from '@/app/components/workflow/run/result-panel'
 import Toast from '@/app/components/base/toast'
 import { TransferMethod } from '@/types/app'
 import { getProcessedFiles } from '@/app/components/base/file-uploader/utils'
+import type { NodeTracing } from '@/types/workflow'
+import RetryResultPanel from '@/app/components/workflow/run/retry-result-panel'
 import type { BlockEnum } from '@/app/components/workflow/types'
 import type { Emoji } from '@/app/components/tools/types'
-import type { SpecialResultPanelProps } from '@/app/components/workflow/run/special-result-panel'
-import SpecialResultPanel from '@/app/components/workflow/run/special-result-panel'
 
 const i18nPrefix = 'workflow.singleRun'
 
@@ -34,12 +34,13 @@ type BeforeRunFormProps = {
   runningStatus: NodeRunningStatus
   result?: JSX.Element
   forms: FormProps[]
-  showSpecialResultPanel?: boolean
-} & Partial<SpecialResultPanelProps>
+  retryDetails?: NodeTracing[]
+  onRetryDetailBack?: any
+}
 
 function formatValue(value: string | any, type: InputVarType) {
   if (type === InputVarType.number)
-    return Number.parseFloat(value)
+    return parseFloat(value)
   if (type === InputVarType.json)
     return JSON.parse(value)
   if (type === InputVarType.contexts) {
@@ -65,8 +66,8 @@ const BeforeRunForm: FC<BeforeRunFormProps> = ({
   runningStatus,
   result,
   forms,
-  showSpecialResultPanel,
-  ...restResultPanelParams
+  retryDetails,
+  onRetryDetailBack = () => { },
 }) => {
   const { t } = useTranslation()
 
@@ -140,14 +141,24 @@ const BeforeRunForm: FC<BeforeRunFormProps> = ({
           </div>
         </div>
         {
-          showSpecialResultPanel && (
+          retryDetails?.length && (
             <div className='h-0 grow overflow-y-auto pb-4'>
-              <SpecialResultPanel {...restResultPanelParams} />
+              <RetryResultPanel
+                list={retryDetails.map((item, index) => ({
+                  ...item,
+                  title: `${t('workflow.nodes.common.retry.retry')} ${index + 1}`,
+                  node_type: nodeType!,
+                  extras: {
+                    icon: toolIcon!,
+                  },
+                }))}
+                onBack={onRetryDetailBack}
+              />
             </div>
           )
         }
         {
-          !showSpecialResultPanel && (
+          !retryDetails?.length && (
             <div className='h-0 grow overflow-y-auto pb-4'>
               <div className='mt-3 px-4 space-y-4'>
                 {forms.map((form, index) => (

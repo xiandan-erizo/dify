@@ -6,7 +6,7 @@ import { ModelTypeEnum } from '../../header/account-setting/model-provider-page/
 import StepOne from './step-one'
 import StepTwo from './step-two'
 import StepThree from './step-three'
-import { TopBar } from './top-bar'
+import { Topbar } from './top-bar'
 import { DataSourceType } from '@/models/datasets'
 import type { CrawlOptions, CrawlResultItem, DataSet, FileItem, createDocumentResponse } from '@/models/datasets'
 import { fetchDataSource } from '@/service/common'
@@ -111,7 +111,7 @@ const DatasetUpdateForm = ({ datasetId }: DatasetUpdateFormProps) => {
           const detail = await fetchDatasetDetail(datasetId)
           setDetail(detail)
         }
-        catch {
+        catch (e) {
           setHasError(true)
         }
       }
@@ -123,7 +123,7 @@ const DatasetUpdateForm = ({ datasetId }: DatasetUpdateFormProps) => {
 
   return (
     <div className='flex flex-col bg-components-panel-bg' style={{ height: 'calc(100vh - 56px)' }}>
-      <TopBar activeIndex={step - 1} datasetId={datasetId} />
+      <Topbar activeIndex={step - 1} />
       <div style={{ height: 'calc(100% - 52px)' }}>
         {step === 1 && <StepOne
           hasConnection={hasConnection}

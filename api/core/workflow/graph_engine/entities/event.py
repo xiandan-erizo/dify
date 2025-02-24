@@ -4,7 +4,6 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from core.workflow.entities.node_entities import AgentNodeStrategyInit
 from core.workflow.graph_engine.entities.runtime_route_state import RouteNodeState
 from core.workflow.nodes import NodeType
 from core.workflow.nodes.base import BaseNodeData
@@ -67,10 +66,8 @@ class BaseNodeEvent(GraphEngineEvent):
 
 class NodeRunStartedEvent(BaseNodeEvent):
     predecessor_node_id: Optional[str] = None
-    """predecessor node id"""
     parallel_mode_run_id: Optional[str] = None
-    """iteration node parallel mode run id"""
-    agent_strategy: Optional[AgentNodeStrategyInit] = None
+    """predecessor node id"""
 
 
 class NodeRunStreamChunkEvent(BaseNodeEvent):
@@ -167,8 +164,8 @@ class IterationRunStartedEvent(BaseIterationEvent):
 
 class IterationRunNextEvent(BaseIterationEvent):
     index: int = Field(..., description="index")
-    pre_iteration_output: Optional[Any] = None
-    duration: Optional[float] = None
+    pre_iteration_output: Optional[Any] = Field(None, description="pre iteration output")
+    duration: Optional[float] = Field(None, description="duration")
 
 
 class IterationRunSucceededEvent(BaseIterationEvent):
@@ -189,24 +186,4 @@ class IterationRunFailedEvent(BaseIterationEvent):
     error: str = Field(..., description="failed reason")
 
 
-###########################################
-# Agent Events
-###########################################
-
-
-class BaseAgentEvent(GraphEngineEvent):
-    pass
-
-
-class AgentLogEvent(BaseAgentEvent):
-    id: str = Field(..., description="id")
-    label: str = Field(..., description="label")
-    node_execution_id: str = Field(..., description="node execution id")
-    parent_id: str | None = Field(..., description="parent id")
-    error: str | None = Field(..., description="error")
-    status: str = Field(..., description="status")
-    data: Mapping[str, Any] = Field(..., description="data")
-    metadata: Optional[Mapping[str, Any]] = Field(default=None, description="metadata")
-
-
-InNodeEvent = BaseNodeEvent | BaseParallelBranchEvent | BaseIterationEvent | BaseAgentEvent
+InNodeEvent = BaseNodeEvent | BaseParallelBranchEvent | BaseIterationEvent

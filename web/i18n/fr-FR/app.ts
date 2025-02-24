@@ -188,12 +188,6 @@ const translation = {
     searchAllTemplate: 'Rechercher dans tous les modèles...',
   },
   showMyCreatedAppsOnly: 'Afficher uniquement mes applications créées',
-  appSelector: {
-    noParams: 'Aucun paramètre nécessaire',
-    params: 'PARAMÈTRES DE L’APPLICATION',
-    label: 'APPLI',
-    placeholder: 'Sélectionnez une application...',
-  },
 }
 
 export default translation

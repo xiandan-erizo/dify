@@ -66,7 +66,6 @@ const AppContext = createContext<AppContextValue>({
     name: '',
     email: '',
     avatar: '',
-    avatar_url: '',
     is_password_set: false,
   },
   currentWorkspace: initialWorkspaceInfo,

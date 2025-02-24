@@ -184,12 +184,6 @@ const translation = {
     byCategories: 'KATEGORILERE GÖRE',
   },
   showMyCreatedAppsOnly: 'Sadece oluşturduğum uygulamaları göster',
-  appSelector: {
-    noParams: 'Parametre gerekmez',
-    label: 'Uygulama',
-    placeholder: 'Bir uygulama seçin...',
-    params: 'UYGULAMA PARAMETRELERI',
-  },
 }
 
 export default translation

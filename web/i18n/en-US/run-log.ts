@@ -24,8 +24,6 @@ const translation = {
     link: 'detail panel',
     tipRight: ' view it.',
   },
-  actionLogs: 'Action Logs',
-  circularInvocationTip: 'There is circular invocation of tools/nodes in the current workflow.',
 }
 
 export default translation

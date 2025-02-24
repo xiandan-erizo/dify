@@ -188,12 +188,6 @@ const translation = {
     byCategories: 'DUPĂ CATEGORII',
   },
   showMyCreatedAppsOnly: 'Afișează doar aplicațiile create de mine',
-  appSelector: {
-    label: 'APLICAȚIE',
-    params: 'PARAMETRII APLICAȚIEI',
-    noParams: 'Nu sunt necesari parametri',
-    placeholder: 'Selectați o aplicație...',
-  },
 }
 
 export default translation

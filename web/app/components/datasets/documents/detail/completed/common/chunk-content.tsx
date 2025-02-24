@@ -3,7 +3,6 @@ import type { ComponentProps, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChunkingMode } from '@/models/datasets'
 import classNames from '@/utils/classnames'
-import { Markdown } from '@/app/components/base/markdown'
 
 type IContentProps = ComponentProps<'textarea'>
 
@@ -53,7 +52,7 @@ const AutoResizeTextArea: FC<IAutoResizeTextAreaProps> = React.memo(({
     if (!textarea)
       return
     textarea.style.height = 'auto'
-    const lineHeight = Number.parseInt(getComputedStyle(textarea).lineHeight)
+    const lineHeight = parseInt(getComputedStyle(textarea).lineHeight)
     const textareaHeight = Math.max(textarea.scrollHeight, lineHeight)
     textarea.style.height = `${textareaHeight}px`
   }, [value])
@@ -174,15 +173,6 @@ const ChunkContent: FC<IChunkContentProps> = ({
       onAnswerChange={onAnswerChange}
       isEditMode={isEditMode}
     />
-  }
-
-  if (!isEditMode) {
-    return (
-      <Markdown
-        className='h-full w-full !text-text-secondary'
-        content={question}
-      />
-    )
   }
 
   return (

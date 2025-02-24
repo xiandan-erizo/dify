@@ -1,7 +1,8 @@
 const translation = {
   steps: {
     header: {
-      fallbackRoute: 'Knowledge',
+      creation: 'Create Knowledge',
+      update: 'Add data',
     },
     one: 'Data Source',
     two: 'Document Processing',

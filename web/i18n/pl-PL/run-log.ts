@@ -24,8 +24,6 @@ const translation = {
     link: 'panelu szczegółów',
     tipRight: ' aby je zobaczyć.',
   },
-  circularInvocationTip: 'W bieżącym przepływie pracy istnieje cykliczne wywoływanie narzędzi/węzłów.',
-  actionLogs: 'Dzienniki akcji',
 }
 
 export default translation

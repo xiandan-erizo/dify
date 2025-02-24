@@ -188,12 +188,6 @@ const translation = {
     searchAllTemplate: 'Buscar todas las plantillas...',
   },
   showMyCreatedAppsOnly: 'Mostrar solo mis aplicaciones creadas',
-  appSelector: {
-    label: 'APLICACIÓN',
-    placeholder: 'Selecciona una aplicación...',
-    noParams: 'No se necesitan parámetros',
-    params: 'PARÁMETROS DE LA APLICACIÓN',
-  },
 }
 
 export default translation

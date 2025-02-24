@@ -33,7 +33,7 @@ const Flowchart = React.forwardRef((props: {
 
   const prevPrimitiveCode = usePrevious(props.PrimitiveCode)
   const [isLoading, setIsLoading] = useState(true)
-  const timeRef = useRef<number>()
+  const timeRef = useRef<NodeJS.Timeout>()
   const [errMsg, setErrMsg] = useState('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState('')
 
@@ -75,15 +75,15 @@ const Flowchart = React.forwardRef((props: {
 
   useEffect(() => {
     if (timeRef.current)
-      window.clearTimeout(timeRef.current)
+      clearTimeout(timeRef.current)
 
-    timeRef.current = window.setTimeout(() => {
+    timeRef.current = setTimeout(() => {
       renderFlowchart(props.PrimitiveCode)
     }, 300)
   }, [props.PrimitiveCode])
 
   return (
-    // eslint-disable-next-line ts/ban-ts-comment
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     <div ref={ref}>
       <div className="msh-segmented msh-segmented-sm css-23bs09 css-var-r1">
@@ -135,7 +135,5 @@ const Flowchart = React.forwardRef((props: {
     </div>
   )
 })
-
-Flowchart.displayName = 'Flowchart'
 
 export default Flowchart

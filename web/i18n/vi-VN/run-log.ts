@@ -24,8 +24,6 @@ const translation = {
     link: 'bảng chi tiết',
     tipRight: ' xem nó.',
   },
-  circularInvocationTip: 'Có lệnh gọi vòng tròn các công cụ/nút trong quy trình làm việc hiện tại.',
-  actionLogs: 'Nhật ký hành động',
 }
 
 export default translation

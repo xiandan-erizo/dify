@@ -1,6 +1,5 @@
 import type { LangFuseConfig, LangSmithConfig, OpikConfig, TracingProvider } from '@/app/(commonLayout)/app/(appDetailLayout)/[appId]/overview/tracing/type'
 import type { App, AppSSO, AppTemplate, SiteConfig } from '@/types/app'
-import type { Dependency } from '@/app/components/plugins/types'
 
 /* export type App = {
   id: string
@@ -88,7 +87,6 @@ export type DSLImportResponse = {
   current_dsl_version?: string
   imported_dsl_version?: string
   error: string
-  leaked_dependencies: Dependency[]
 }
 
 export type AppSSOResponse = { enabled: AppSSO['enable_sso'] }

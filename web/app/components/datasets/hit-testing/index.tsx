@@ -7,6 +7,7 @@ import { omit } from 'lodash-es'
 import { useBoolean } from 'ahooks'
 import { useContext } from 'use-context-selector'
 import { RiApps2Line, RiFocus2Line } from '@remixicon/react'
+import SegmentCard from '../documents/detail/completed/SegmentCard'
 import Textarea from './textarea'
 import s from './style.module.css'
 import ModifyRetrievalModal from './modify-retrieval-modal'
@@ -24,7 +25,6 @@ import type { RetrievalConfig } from '@/types/app'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import useTimestamp from '@/hooks/use-timestamp'
 import docStyle from '@/app/components/datasets/documents/detail/completed/style.module.css'
-import { CardSkelton } from '../documents/detail/completed/skeleton/general-list-skeleton'
 
 const limit = 10
 
@@ -180,9 +180,11 @@ const HitTestingPage: FC<Props> = ({ datasetId }: Props) => {
         <div className='flex flex-col pt-3'>
           {/* {renderHitResults(generalResultData)} */}
           {submitLoading
-            ? <div className='h-full flex flex-col py-3 px-4 rounded-t-2xl bg-background-body'>
-              <CardSkelton />
-            </div>
+            ? <SegmentCard
+              loading={true}
+              scene='hitTesting'
+              className='h-[216px]'
+            />
             : (
               (() => {
                 if (!hitResult?.records.length && !externalHitResult?.records.length)

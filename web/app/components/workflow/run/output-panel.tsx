@@ -54,7 +54,7 @@ const OutputPanel: FC<OutputPanelProps> = ({
     return getProcessedFilesFromResponse(fileList)
   }, [outputs])
   return (
-    <div className='p-2'>
+    <div className='py-2'>
       {isRunning && (
         <div className='pt-4 pl-[26px]'>
           <LoadingAnim type='text' />

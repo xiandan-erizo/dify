@@ -1,7 +1,8 @@
 const translation = {
   steps: {
     header: {
-      fallbackRoute: '知识库',
+      creation: '创建知识库',
+      update: '上传文件',
     },
     one: '选择数据源',
     two: '文本分段与清洗',

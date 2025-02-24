@@ -183,7 +183,7 @@ class AdvancedChatAppGenerateEntity(ConversationAppGenerateEntity):
         """
 
         node_id: str
-        inputs: Mapping
+        inputs: dict
 
     single_iteration_run: Optional[SingleIterationRunEntity] = None
 

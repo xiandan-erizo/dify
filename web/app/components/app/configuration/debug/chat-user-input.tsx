@@ -84,6 +84,7 @@ const ChatUserInput = ({
                     onSelect={(i) => { handleInputValueChange(key, i.value as string) }}
                     items={(options || []).map(i => ({ name: i, value: i }))}
                     allowSearch={false}
+                    bgClassName='bg-gray-50'
                   />
                 )}
                 {type === 'number' && (

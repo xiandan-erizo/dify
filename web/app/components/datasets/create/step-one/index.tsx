@@ -23,7 +23,7 @@ import classNames from '@/utils/classnames'
 type IStepOneProps = {
   datasetId?: string
   dataSourceType?: DataSourceType
-  dataSourceTypeDisable: boolean
+  dataSourceTypeDisable: Boolean
   hasConnection: boolean
   onSetting: () => void
   files: FileItem[]
@@ -137,7 +137,7 @@ const StepOne = ({
             }
             {
               shouldShowDataSourceTypeList && (
-                <div className='grid grid-cols-3 mb-8 gap-4'>
+                <div className='flex items-center mb-8 flex-wrap gap-4'>
                   <div
                     className={cn(
                       s.dataSourceItem,
@@ -153,12 +153,7 @@ const StepOne = ({
                     }}
                   >
                     <span className={cn(s.datasetIcon)} />
-                    <span
-                      title={t('datasetCreation.stepOne.dataSourceType.file')}
-                      className='truncate'
-                    >
-                      {t('datasetCreation.stepOne.dataSourceType.file')}
-                    </span>
+                    {t('datasetCreation.stepOne.dataSourceType.file')}
                   </div>
                   <div
                     className={cn(
@@ -175,12 +170,7 @@ const StepOne = ({
                     }}
                   >
                     <span className={cn(s.datasetIcon, s.notion)} />
-                    <span
-                      title={t('datasetCreation.stepOne.dataSourceType.notion')}
-                      className='truncate'
-                    >
-                      {t('datasetCreation.stepOne.dataSourceType.notion')}
-                    </span>
+                    {t('datasetCreation.stepOne.dataSourceType.notion')}
                   </div>
                   <div
                     className={cn(
@@ -191,12 +181,7 @@ const StepOne = ({
                     onClick={() => changeType(DataSourceType.WEB)}
                   >
                     <span className={cn(s.datasetIcon, s.web)} />
-                    <span
-                      title={t('datasetCreation.stepOne.dataSourceType.web')}
-                      className='truncate'
-                    >
-                      {t('datasetCreation.stepOne.dataSourceType.web')}
-                    </span>
+                    {t('datasetCreation.stepOne.dataSourceType.web')}
                   </div>
                 </div>
               )

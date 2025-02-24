@@ -24,8 +24,6 @@ const translation = {
     link: 'پنل جزئیات',
     tipRight: ' بروید و آن را مشاهده کنید.',
   },
-  actionLogs: 'گزارش های اکشن',
-  circularInvocationTip: 'فراخوانی دایره ای ابزارها/گره ها در گردش کار فعلی وجود دارد.',
 }
 
 export default translation

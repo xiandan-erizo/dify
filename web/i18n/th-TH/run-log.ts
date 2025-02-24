@@ -24,8 +24,6 @@ const translation = {
     link: 'แผงรายละเอียด',
     tipRight: 'ดูมัน',
   },
-  circularInvocationTip: 'มีการเรียกใช้เครื่องมือ/โหนดแบบวงกลมในเวิร์กโฟลว์ปัจจุบัน',
-  actionLogs: 'บันทึกการดําเนินการ',
 }
 
 export default translation

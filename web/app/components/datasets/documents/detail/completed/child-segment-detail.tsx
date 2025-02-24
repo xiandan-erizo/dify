@@ -50,6 +50,7 @@ const ChildSegmentDetail: FC<IChildSegmentDetailProps> = ({
 
   const handleCancel = () => {
     onCancel()
+    setContent(childChunkInfo?.content || '')
   }
 
   const handleSave = () => {

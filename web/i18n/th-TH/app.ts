@@ -184,12 +184,6 @@ const translation = {
     byCategories: 'ตามหมวดหมู่',
   },
   showMyCreatedAppsOnly: 'แสดงเฉพาะแอปที่ฉันสร้าง',
-  appSelector: {
-    placeholder: 'เลือกแอป...',
-    params: 'พารามิเตอร์แอพ',
-    noParams: 'ไม่จําเป็นต้องใช้พารามิเตอร์',
-    label: 'แอพ',
-  },
 }
 
 export default translation

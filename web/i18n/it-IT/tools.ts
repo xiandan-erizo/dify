@@ -140,7 +140,6 @@ const translation = {
     number: 'numero',
     required: 'Richiesto',
     infoAndSetting: 'Info & Impostazioni',
-    file: 'file',
   },
   noCustomTool: {
     title: 'Nessun strumento personalizzato!',
@@ -161,8 +160,6 @@ const translation = {
   openInStudio: 'Apri in Studio',
   toolNameUsageTip:
     'Nome chiamata strumento per il ragionamento e il prompting dell\'agente',
-  noTools: 'Nessun utensile trovato',
-  copyToolName: 'Copia nome',
 }
 
 export default translation

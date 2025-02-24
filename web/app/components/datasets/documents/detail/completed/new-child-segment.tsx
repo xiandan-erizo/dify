@@ -68,6 +68,7 @@ const NewChildSegmentModal: FC<NewChildSegmentModalProps> = ({
   const handleCancel = (actionType: 'esc' | 'add' = 'esc') => {
     if (actionType === 'esc' || !addAnother)
       onCancel()
+    setContent('')
   }
 
   const { mutateAsync: addChildSegment } = useAddChildSegment()

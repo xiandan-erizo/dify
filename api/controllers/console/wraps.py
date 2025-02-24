@@ -7,7 +7,6 @@ from flask_login import current_user  # type: ignore
 
 from configs import dify_config
 from controllers.console.workspace.error import AccountNotInitializedError
-from extensions.ext_database import db
 from models.model import DifySetup
 from services.feature_service import FeatureService, LicenseStatus
 from services.operation_service import OperationService
@@ -135,13 +134,9 @@ def setup_required(view):
     @wraps(view)
     def decorated(*args, **kwargs):
         # check setup
-        if (
-            dify_config.EDITION == "SELF_HOSTED"
-            and os.environ.get("INIT_PASSWORD")
-            and not db.session.query(DifySetup).first()
-        ):
+        if dify_config.EDITION == "SELF_HOSTED" and os.environ.get("INIT_PASSWORD") and not DifySetup.query.first():
             raise NotInitValidateError()
-        elif dify_config.EDITION == "SELF_HOSTED" and not db.session.query(DifySetup).first():
+        elif dify_config.EDITION == "SELF_HOSTED" and not DifySetup.query.first():
             raise NotSetupError()
 
         return view(*args, **kwargs)

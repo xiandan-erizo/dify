@@ -6,12 +6,14 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ### Run by source code
 
-To start the web frontend service, you will need [Node.js v18.x (LTS)](https://nodejs.org/en) and [pnpm version 9.12.2](https://pnpm.io).
+To start the web frontend service, you will need [Node.js v18.x (LTS)](https://nodejs.org/en) and [NPM version 8.x.x](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/).
 
 First, install the dependencies:
 
 ```bash
-pnpm install
+npm install
+# or
+yarn install --frozen-lockfile
 ```
 
 Then, configure the environment variables. Create a file named `.env.local` in the current directory and copy the contents from `.env.example`. Modify the values of these environment variables according to your requirements:
@@ -41,7 +43,9 @@ NEXT_PUBLIC_SENTRY_DSN=
 Finally, run the development server:
 
 ```bash
-pnpm run dev
+npm run dev
+# or
+yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -55,22 +59,20 @@ You can start editing the file under folder `app`. The page auto-updates as you 
 First, build the app for production:
 
 ```bash
-pnpm run build
+npm run build
 ```
 
 Then, start the server:
 
 ```bash
-pnpm run start
+npm run start
 ```
 
 If you want to customize the host and port:
 
 ```bash
-pnpm run start --port=3001 --host=0.0.0.0
+npm run start --port=3001 --host=0.0.0.0
 ```
-
-If you want to customize the number of instances launched by PM2, you can configure `PM2_INSTANCES` in `docker-compose.yaml` or `Dockerfile`.
 
 ## Storybook
 
@@ -79,7 +81,7 @@ This project uses [Storybook](https://storybook.js.org/) for UI component develo
 To start the storybook server, run:
 
 ```bash
-pnpm storybook
+yarn storybook
 ```
 
 Open [http://localhost:6006](http://localhost:6006) with your browser to see the result.
@@ -97,7 +99,7 @@ You can create a test file with a suffix of `.spec` beside the file that to be t
 Run test:
 
 ```bash
-pnpm run test
+npm run test
 ```
 
 If you are not familiar with writing tests, here is some code to refer to:

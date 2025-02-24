@@ -79,9 +79,6 @@ const HandThumbIconWithCount: FC<{ count: number; iconType: 'up' | 'down' }> = (
 }
 
 const statusTdRender = (statusCount: StatusCount) => {
-  if (!statusCount)
-    return null
-
   if (statusCount.partial_success + statusCount.failed === 0) {
     return (
       <div className='inline-flex items-center gap-1 system-xs-semibold-uppercase'>
@@ -635,10 +632,9 @@ const ConversationList: FC<IConversationList> = ({ logs, appDetail, onRefresh })
   const [currentConversation, setCurrentConversation] = useState<ChatConversationGeneralDetail | CompletionConversationGeneralDetail | undefined>() // Currently selected conversation
   const isChatMode = appDetail.mode !== 'completion' // Whether the app is a chat app
   const isChatflow = appDetail.mode === 'advanced-chat' // Whether the app is a chatflow app
-  const { setShowPromptLogModal, setShowAgentLogModal, setShowMessageLogModal } = useAppStore(useShallow(state => ({
+  const { setShowPromptLogModal, setShowAgentLogModal } = useAppStore(useShallow(state => ({
     setShowPromptLogModal: state.setShowPromptLogModal,
     setShowAgentLogModal: state.setShowAgentLogModal,
-    setShowMessageLogModal: state.setShowMessageLogModal,
   })))
 
   // Annotated data needs to be highlighted
@@ -665,7 +661,6 @@ const ConversationList: FC<IConversationList> = ({ logs, appDetail, onRefresh })
     setCurrentConversation(undefined)
     setShowPromptLogModal(false)
     setShowAgentLogModal(false)
-    setShowMessageLogModal(false)
   }
 
   if (!logs)

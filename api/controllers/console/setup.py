@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse  # type: ignore
 from configs import dify_config
 from libs.helper import StrLen, email, extract_remote_ip
 from libs.password import valid_password
-from models.model import DifySetup, db
+from models.model import DifySetup
 from services.account_service import RegisterService, TenantService
 
 from . import api
@@ -52,9 +52,8 @@ class SetupApi(Resource):
 
 def get_setup_status():
     if dify_config.EDITION == "SELF_HOSTED":
-        return db.session.query(DifySetup).first()
-    else:
-        return True
+        return DifySetup.query.first()
+    return True
 
 
 api.add_resource(SetupApi, "/setup")
