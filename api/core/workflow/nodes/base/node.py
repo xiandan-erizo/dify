@@ -56,7 +56,11 @@ class BaseNode(Generic[GenericNodeData]):
 
         self.node_id = node_id
 
-        node_data = self._node_data_cls.model_validate(config.get("data", {}))
+        try:
+            node_data = self._node_data_cls.model_validate(config.get("data", {}))
+        except Exception as e:
+            logger.exception(f"Node {self.node_id} failed to parse node data")
+            raise e
         self.node_data = cast(GenericNodeData, node_data)
 
     @abstractmethod
