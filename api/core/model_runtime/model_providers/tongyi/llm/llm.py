@@ -57,15 +57,15 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
     tokenizers = {}
 
     def _invoke(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        model_parameters: dict,
-        tools: Optional[list[PromptMessageTool]] = None,
-        stop: Optional[list[str]] = None,
-        stream: bool = True,
-        user: Optional[str] = None,
+            self,
+            model: str,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            model_parameters: dict,
+            tools: Optional[list[PromptMessageTool]] = None,
+            stop: Optional[list[str]] = None,
+            stream: bool = True,
+            user: Optional[str] = None,
     ) -> Union[LLMResult, Generator]:
         """
         Invoke large language model
@@ -84,11 +84,11 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
         return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def get_num_tokens(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        tools: Optional[list[PromptMessageTool]] = None,
+            self,
+            model: str,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            tools: Optional[list[PromptMessageTool]] = None,
     ) -> int:
         """
         Get number of tokens for given prompt messages
@@ -144,15 +144,15 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
             raise CredentialsValidateFailedError(str(ex))
 
     def _generate(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        model_parameters: dict,
-        tools: Optional[list[PromptMessageTool]] = None,
-        stop: Optional[list[str]] = None,
-        stream: bool = True,
-        user: Optional[str] = None,
+            self,
+            model: str,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            model_parameters: dict,
+            tools: Optional[list[PromptMessageTool]] = None,
+            stop: Optional[list[str]] = None,
+            stream: bool = True,
+            user: Optional[str] = None,
     ) -> Union[LLMResult, Generator]:
         """
         Invoke large language model
@@ -190,14 +190,19 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
         }
 
         model_schema = self.get_model_schema(model, credentials)
+
+        headers = {
+            "X-DashScope-DataInspection": '{"input": "disable", "output": "disable"}'
+        }
+
         if ModelFeature.VISION in (model_schema.features or []):
             params["messages"] = self._convert_prompt_messages_to_tongyi_messages(prompt_messages, rich_content=True)
 
-            response = MultiModalConversation.call(**params, stream=stream)
+            response = MultiModalConversation.call(**params, stream=stream, headers=headers)
         else:
             # nothing different between chat model and completion model in tongyi
             params["messages"] = self._convert_prompt_messages_to_tongyi_messages(prompt_messages)
-            response = Generation.call(**params, result_format="message", stream=stream)
+            response = Generation.call(**params, result_format="message", stream=stream, headers=headers)
 
         if stream:
             return self._handle_generate_stream_response(model, credentials, response, prompt_messages)
@@ -205,7 +210,7 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
         return self._handle_generate_response(model, credentials, response, prompt_messages)
 
     def _handle_generate_response(
-        self, model: str, credentials: dict, response: GenerationResponse, prompt_messages: list[PromptMessage]
+            self, model: str, credentials: dict, response: GenerationResponse, prompt_messages: list[PromptMessage]
     ) -> LLMResult:
         """
         Handle llm response
@@ -241,11 +246,11 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
         return result
 
     def _handle_generate_stream_response(
-        self,
-        model: str,
-        credentials: dict,
-        responses: Generator[GenerationResponse, None, None],
-        prompt_messages: list[PromptMessage],
+            self,
+            model: str,
+            credentials: dict,
+            responses: Generator[GenerationResponse, None, None],
+            prompt_messages: list[PromptMessage],
     ) -> Generator:
         """
         Handle llm stream response
@@ -391,7 +396,7 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
         return text.rstrip()
 
     def _convert_prompt_messages_to_tongyi_messages(
-        self, prompt_messages: list[PromptMessage], rich_content: bool = False
+            self, prompt_messages: list[PromptMessage], rich_content: bool = False
     ) -> list[dict]:
         """
         Convert prompt messages to tongyi messages
